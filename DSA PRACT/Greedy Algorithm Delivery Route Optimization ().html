@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Route Optimization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #output {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Delivery Route Optimization</h1>
+    <div>
+        <label for="locations">Enter locations as x,y coordinates (e.g., "0,0 2,3 4,1"):</label><br>
+        <input type="text" id="locations" placeholder="Enter locations">
+        <button onclick="optimizeRoute()">Optimize Route</button>
+    </div>
+    <div id="output"></div>
+    <script>
+        function parseLocations(input) {
+            return input.split(' ').map(coord => {
+                const [x, y] = coord.split(',').map(Number);
+                return { x, y };
+            });
+        }
+
+        function calculateDistance(a, b) {
+            return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+        }
+
+        function optimizeRoute() {
+            const input = document.getElementById("locations").value.trim();
+            if (!input) {
+                alert("Please enter valid coordinates.");
+                return;
+            }
+
+            const locations = parseLocations(input);
+            const visited = new Array(locations.length).fill(false);
+            let currentLocation = locations[0];
+            visited[0] = true;
+            let route = [0];
+            let totalDistance = 0;
+
+            for (let i = 1; i < locations.length; i++) {
+                let nearest = -1;
+                let minDistance = Infinity;
+
+                for (let j = 0; j < locations.length; j++) {
+                    if (!visited[j]) {
+                        const distance = calculateDistance(currentLocation, locations[j]);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            nearest = j;
+                        }
+                    }
+                }
+
+                visited[nearest] = true;
+                totalDistance += minDistance;
+                currentLocation = locations[nearest];
+                route.push(nearest);
+            }
+
+            const output = `
+                Optimized Route: ${route.join(' -> ')}<br>
+                Total Distance: ${totalDistance.toFixed(2)}
+            `;
+            document.getElementById("output").innerHTML = output;
+        }
+    </script>
+</body>
+</html>

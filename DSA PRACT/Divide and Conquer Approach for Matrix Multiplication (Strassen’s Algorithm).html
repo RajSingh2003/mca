@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Multiplication - Strassen's Algorithm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f5;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        textarea {
+            width: 90%;
+            height: 100px;
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        pre {
+            background: #eee;
+            padding: 10px;
+            overflow-x: auto;
+            text-align: left;
+        }
+
+        .output {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Matrix Multiplication - Strassen's Algorithm</h1>
+    <p>Enter two matrices in JSON format:</p>
+
+    <textarea id="matrixA" placeholder='Matrix A (e.g., [[1,2],[3,4]])'></textarea>
+    <textarea id="matrixB" placeholder='Matrix B (e.g., [[5,6],[7,8]])'></textarea>
+    <button onclick="compareAlgorithms()">Multiply Matrices</button>
+
+    <div class="output">
+        <h2>Output:</h2>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        function parseMatrix(input) {
+            try {
+                return JSON.parse(input);
+            } catch (e) {
+                throw new Error("Invalid matrix format. Please provide a valid JSON array.");
+            }
+        }
+
+        function standardMultiply(A, B) {
+            const n = A.length;
+            const C = Array.from({ length: n }, () => Array(n).fill(0));
+
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    for (let k = 0; k < n; k++) {
+                        C[i][j] += A[i][k] * B[k][j];
+                    }
+                }
+            }
+
+            return C;
+        }
+
+        function strassenMultiply(A, B) {
+            const n = A.length;
+            if (n === 1) {
+                return [[A[0][0] * B[0][0]]];
+            }
+
+            const half = Math.floor(n / 2);
+
+            function splitMatrix(M) {
+                const size = M.length / 2;
+                const a11 = [], a12 = [], a21 = [], a22 = [];
+
+                for (let i = 0; i < size; i++) {
+                    a11.push(M[i].slice(0, size));
+                    a12.push(M[i].slice(size));
+                    a21.push(M[i + size].slice(0, size));
+                    a22.push(M[i + size].slice(size));
+                }
+
+                return [a11, a12, a21, a22];
+            }
+
+            const [a11, a12, a21, a22] = splitMatrix(A);
+            const [b11, b12, b21, b22] = splitMatrix(B);
+
+            function addMatrices(X, Y) {
+                return X.map((row, i) => row.map((val, j) => val + Y[i][j]));
+            }
+
+            function subtractMatrices(X, Y) {
+                return X.map((row, i) => row.map((val, j) => val - Y[i][j]));
+            }
+
+            const p1 = strassenMultiply(a11, subtractMatrices(b12, b22));
+            const p2 = strassenMultiply(addMatrices(a11, a12), b22);
+            const p3 = strassenMultiply(addMatrices(a21, a22), b11);
+            const p4 = strassenMultiply(a22, subtractMatrices(b21, b11));
+            const p5 = strassenMultiply(addMatrices(a11, a22), addMatrices(b11, b22));
+            const p6 = strassenMultiply(subtractMatrices(a12, a22), addMatrices(b21, b22));
+            const p7 = strassenMultiply(subtractMatrices(a11, a21), addMatrices(b11, b12));
+
+            const c11 = addMatrices(subtractMatrices(addMatrices(p5, p4), p2), p6);
+            const c12 = addMatrices(p1, p2);
+            const c21 = addMatrices(p3, p4);
+            const c22 = subtractMatrices(subtractMatrices(addMatrices(p5, p1), p3), p7);
+
+            const C = Array.from({ length: n }, () => []);
+
+            for (let i = 0; i < half; i++) {
+                C[i] = [...c11[i], ...c12[i]];
+                C[i + half] = [...c21[i], ...c22[i]];
+            }
+
+            return C;
+        }
+
+        function compareAlgorithms() {
+            const matrixAInput = document.getElementById('matrixA').value;
+            const matrixBInput = document.getElementById('matrixB').value;
+
+            try {
+                const A = parseMatrix(matrixAInput);
+                const B = parseMatrix(matrixBInput);
+
+                if (A.length !== B.length || A[0].length !== B[0].length || A.length !== A[0].length) {
+                    throw new Error("Only square matrices of the same size are supported.");
+                }
+
+                const startStandard = performance.now();
+                const standardResult = standardMultiply(A, B);
+                const endStandard = performance.now();
+
+                const startStrassen = performance.now();
+                const strassenResult = strassenMultiply(A, B);
+                const endStrassen = performance.now();
+
+                document.getElementById('output').textContent = `Standard Algorithm Result:\n${JSON.stringify(standardResult)}\nTime: ${(endStandard - startStandard).toFixed(2)}ms\n\nStrassen's Algorithm Result:\n${JSON.stringify(strassenResult)}\nTime: ${(endStrassen - startStrassen).toFixed(2)}ms`;
+            } catch (error) {
+                document.getElementById('output').textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Train Route Simulation</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="flex items-center justify-center h-screen bg-gray-100">
+  <div class="w-full max-w-md p-6 bg-white shadow-md rounded">
+    <h2 class="text-2xl font-bold text-center mb-4">Train Route Simulation</h2>
+
+    <!-- Input form to add stations -->
+    <form id="stationForm" class="mb-4">
+      <input id="stationInput" type="text" placeholder="Enter station name" class="w-full p-2 border rounded mb-2" required>
+      <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">Add Station</button>
+    </form>
+
+    <!-- List of stations -->
+    <h3 class="font-semibold mb-2">Stations on Route:</h3>
+    <ul id="stationList" class="list-disc pl-5 text-gray-700 mb-4"></ul>
+
+    <!-- Button to start the simulation -->
+    <button onclick="startTrain()" class="w-full bg-green-500 text-white p-2 rounded">Start Train</button>
+  </div>
+
+  <script>
+    // Node structure for each station
+    class Station {
+      constructor(name) {
+        this.name = name;
+        this.next = null;
+      }
+    }
+
+    // Circular linked list to represent train route
+    class TrainRoute {
+      constructor() {
+        this.head = null;
+      }
+
+      // Add a station to the route
+      addStation(name) {
+        const newStation = new Station(name);
+        if (!this.head) {
+          this.head = newStation;
+          newStation.next = this.head; // Point to itself to make circular
+        } else {
+          let current = this.head;
+          while (current.next !== this.head) {
+            current = current.next;
+          }
+          current.next = newStation;
+          newStation.next = this.head; // Maintain the circular structure
+        }
+        this.displayStations();
+      }
+
+      // Display all stations
+      displayStations() {
+        const stationList = document.getElementById("stationList");
+        stationList.innerHTML = "";
+        if (!this.head) return;
+
+        let current = this.head;
+        do {
+          const listItem = document.createElement("li");
+          listItem.textContent = current.name;
+          stationList.appendChild(listItem);
+          current = current.next;
+        } while (current !== this.head);
+      }
+    }
+
+    const trainRoute = new TrainRoute();
+
+    // Handle adding station from form
+    document.getElementById("stationForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const stationName = document.getElementById("stationInput").value;
+      trainRoute.addStation(stationName);
+      document.getElementById("stationInput").value = "";
+    });
+
+    // Simulate train moving through stations
+    function startTrain() {
+      if (!trainRoute.head) return alert("Add stations to start the train!");
+
+      let currentStation = trainRoute.head;
+      setInterval(() => {
+        alert(`Train is at station: ${currentStation.name}`);
+        currentStation = currentStation.next;
+      }, 2000); // 2 seconds per station
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dictionary - Hashing</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, button { padding: 10px; margin: 5px; }
+    pre { background-color: #f5f5f5; padding: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>Dictionary Implementation</h1>
+  <label for="word">Word:</label>
+  <input type="text" id="word" />
+  <label for="meaning">Meaning:</label>
+  <input type="text" id="meaning" />
+  <button onclick="addWord()">Add Word</button>
+  <button onclick="searchWord()">Search Word</button>
+
+  <h2>Dictionary Content:</h2>
+  <pre id="dictionaryContent"></pre>
+
+  <script>
+    class Dictionary {
+      constructor(size) {
+        this.size = size;
+        this.table = new Array(size);
+      }
+
+      // Hash function
+      hash(key) {
+        let hash = 0;
+        for (let i = 0; i < key.length; i++) {
+          hash = (hash + key.charCodeAt(i)) % this.size;
+        }
+        return hash;
+      }
+
+      add(word, meaning) {
+        const index = this.hash(word);
+        if (!this.table[index]) {
+          this.table[index] = [];
+        }
+        this.table[index].push([word, meaning]);
+      }
+
+      search(word) {
+        const index = this.hash(word);
+        const bucket = this.table[index];
+        if (bucket) {
+          for (let i = 0; i < bucket.length; i++) {
+            if (bucket[i][0] === word) {
+              return bucket[i][1];
+            }
+          }
+        }
+        return null;
+      }
+    }
+
+    const dictionary = new Dictionary(10);
+
+    function addWord() {
+      const word = document.getElementById('word').value;
+      const meaning = document.getElementById('meaning').value;
+      dictionary.add(word, meaning);
+      updateDictionaryContent();
+    }
+
+    function searchWord() {
+      const word = document.getElementById('word').value;
+      const meaning = dictionary.search(word);
+      alert(meaning !== null ? `Meaning: ${meaning}` : 'Word not found');
+    }
+
+    function updateDictionaryContent() {
+      const dictionaryContent = JSON.stringify(dictionary.table, null, 2);
+      document.getElementById('dictionaryContent').innerText = dictionaryContent;
+    }
+  </script>
+
+</body>
+</html>
