@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heap Sort - Hospital Patient Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 10px;
+            background-color: #e0f7fa;
+        }
+        #patientData {
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .sorted-list {
+            color: green;
+        }
+        .unsorted-list {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sort Patient Data by Emergency Levels using Heap Sort</h1>
+    <div>
+        <button onclick="sortPatients()">Sort Patients</button>
+    </div>
+
+    <div id="patientData" class="unsorted-list">
+        <p><strong>Unsorted Patient Data (Emergency Level):</strong></p>
+        <p>Patient Data: [{"name": "John", "emergency": 2}, {"name": "Alice", "emergency": 1}, {"name": "Bob", "emergency": 3}]</p>
+    </div>
+
+    <div id="sortedResult" class="sorted-list"></div>
+
+    <script>
+        let patients = [
+            { name: 'John', emergency: 2 },
+            { name: 'Alice', emergency: 1 },
+            { name: 'Bob', emergency: 3 }
+        ];
+
+        // Helper function to heapify the array
+        function heapify(arr, n, i) {
+            let largest = i;
+            const left = 2 * i + 1;
+            const right = 2 * i + 2;
+
+            if (left < n && arr[left].emergency > arr[largest].emergency) {
+                largest = left;
+            }
+
+            if (right < n && arr[right].emergency > arr[largest].emergency) {
+                largest = right;
+            }
+
+            if (largest !== i) {
+                [arr[i], arr[largest]] = [arr[largest], arr[i]]; // Swap
+                heapify(arr, n, largest);
+            }
+        }
+
+        // Heap Sort function
+        function heapSort(arr) {
+            const n = arr.length;
+            // Build max heap
+            for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+                heapify(arr, n, i);
+            }
+
+            // Extract elements from heap
+            for (let i = n - 1; i >= 0; i--) {
+                [arr[0], arr[i]] = [arr[i], arr[0]]; // Swap
+                heapify(arr, i, 0);
+            }
+        }
+
+        // Sort and display result
+        function sortPatients() {
+            heapSort(patients);
+            let resultHTML = '<p><strong>Sorted Patient Data (Emergency Level):</strong></p>';
+            resultHTML += '<p>' + JSON.stringify(patients) + '</p>';
+            document.getElementById('sortedResult').innerHTML = resultHTML;
+            document.getElementById('patientData').className = 'sorted-list';
+        }
+    </script>
+</body>
+</html>

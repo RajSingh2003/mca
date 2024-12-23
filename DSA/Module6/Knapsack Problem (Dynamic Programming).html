@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knapsack Problem - Dynamic Programming</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            margin: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        textarea {
+            width: 80%;
+            height: 100px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .output {
+            margin-top: 20px;
+            text-align: left;
+            display: inline-block;
+        }
+
+        pre {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>0/1 Knapsack Problem</h1>
+    <p>Enter the items as "weight,value" pairs separated by semicolons, and specify the maximum weight capacity.</p>
+    <textarea id="itemsInput" placeholder="e.g., 2,3;4,5;3,6"></textarea>
+    <br>
+    <input id="capacityInput" type="number" placeholder="Capacity" style="font-size: 16px; padding: 5px;"/>
+    <br><br>
+    <button onclick="solveKnapsack()">Solve Knapsack</button>
+
+    <div class="output">
+        <h2>Output:</h2>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        function parseItems(input) {
+            const items = input.split(';').map(pair => {
+                const [weight, value] = pair.split(',').map(Number);
+                if (isNaN(weight) || isNaN(value)) {
+                    throw new Error("Invalid input format. Each item must be a weight,value pair.");
+                }
+                return { weight, value };
+            });
+            return items;
+        }
+
+        function knapsack(items, capacity) {
+            const n = items.length;
+            const dp = Array.from({ length: n + 1 }, () => Array(capacity + 1).fill(0));
+
+            for (let i = 1; i <= n; i++) {
+                for (let w = 1; w <= capacity; w++) {
+                    if (items[i - 1].weight <= w) {
+                        dp[i][w] = Math.max(
+                            items[i - 1].value + dp[i - 1][w - items[i - 1].weight],
+                            dp[i - 1][w]
+                        );
+                    } else {
+                        dp[i][w] = dp[i - 1][w];
+                    }
+                }
+            }
+
+            let w = capacity;
+            const selectedItems = [];
+            for (let i = n; i > 0 && w > 0; i--) {
+                if (dp[i][w] !== dp[i - 1][w]) {
+                    selectedItems.push(items[i - 1]);
+                    w -= items[i - 1].weight;
+                }
+            }
+
+            return {
+                maxValue: dp[n][capacity],
+                selectedItems
+            };
+        }
+
+        function solveKnapsack() {
+            const itemsInput = document.getElementById('itemsInput').value;
+            const capacityInput = document.getElementById('capacityInput').value;
+
+            try {
+                const items = parseItems(itemsInput);
+                const capacity = parseInt(capacityInput);
+
+                if (isNaN(capacity) || capacity <= 0) {
+                    throw new Error("Invalid capacity. Please enter a positive number.");
+                }
+
+                const result = knapsack(items, capacity);
+
+                document.getElementById('output').textContent = `Maximum Value: ${result.maxValue}\nSelected Items: ${JSON.stringify(result.selectedItems, null, 2)}`;
+            } catch (error) {
+                document.getElementById('output').textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

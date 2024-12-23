@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Span Problem</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 400px;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 100%;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .output {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .output p {
+      padding: 8px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Stock Span Problem</h1>
+    <input type="text" id="pricesInput" placeholder="Enter stock prices (comma-separated)">
+    <button id="calculateSpan">Calculate Stock Span</button>
+    <div class="output">
+      <h3>Stock Span Result:</h3>
+      <div id="output"></div>
+    </div>
+  </div>
+
+  <script>
+    // Function to calculate stock span
+    function calculateStockSpan(prices) {
+      const span = [];
+      const stack = []; // Stack to keep track of indices
+
+      for (let i = 0; i < prices.length; i++) {
+        // Pop elements from stack while the current price is greater
+        while (stack.length > 0 && prices[stack[stack.length - 1]] <= prices[i]) {
+          stack.pop();
+        }
+
+        // If stack is empty, all previous prices are smaller
+        span[i] = stack.length === 0 ? i + 1 : i - stack[stack.length - 1];
+
+        // Push the current index onto the stack
+        stack.push(i);
+      }
+
+      return span;
+    }
+
+    // Handle button click
+    document.getElementById("calculateSpan").addEventListener("click", () => {
+      const pricesInput = document.getElementById("pricesInput").value.trim();
+      if (!pricesInput) {
+        alert("Please enter stock prices.");
+        return;
+      }
+
+      const prices = pricesInput.split(",").map(Number);
+      if (prices.some(isNaN)) {
+        alert("Please enter valid numbers separated by commas.");
+        return;
+      }
+
+      const span = calculateStockSpan(prices);
+
+      // Display the result
+      const output = document.getElementById("output");
+      output.innerHTML = prices
+        .map((price, index) => `Day ${index + 1} (Price: ${price}): Span = ${span[index]}`)
+        .join("<br>");
+    });
+  </script>
+</body>
+</html>

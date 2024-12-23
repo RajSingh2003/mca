@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Library Sorter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 80%;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 30px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sort Music Library</h1>
+    <div>
+        <button onclick="sortLibrary('duration')">Sort by Duration</button>
+        <button onclick="sortLibrary('artist')">Sort by Artist</button>
+        <button onclick="sortLibrary('genre')">Sort by Genre</button>
+    </div>
+
+    <table id="musicTable">
+        <thead>
+            <tr>
+                <th>Song</th>
+                <th>Artist</th>
+                <th>Duration</th>
+                <th>Genre</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Songs data will be inserted here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Sample music library data
+    let musicLibrary = [
+        { title: "Song A", artist: "Artist 1", duration: 180, genre: "Pop" },
+        { title: "Song B", artist: "Artist 2", duration: 210, genre: "Rock" },
+        { title: "Song C", artist: "Artist 1", duration: 150, genre: "Jazz" },
+        { title: "Song D", artist: "Artist 3", duration: 240, genre: "Pop" },
+        { title: "Song E", artist: "Artist 2", duration: 200, genre: "Classical" }
+    ];
+
+    // Function to render the music library table
+    function renderLibrary() {
+        const tableBody = document.querySelector("#musicTable tbody");
+        tableBody.innerHTML = ""; // Clear previous rows
+        musicLibrary.forEach(song => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${song.title}</td>
+                <td>${song.artist}</td>
+                <td>${song.duration}</td>
+                <td>${song.genre}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Quick Sort implementation
+    function quickSort(arr, key) {
+        if (arr.length <= 1) return arr;
+        const pivot = arr[0];
+        const left = [];
+        const right = [];
+        
+        for (let i = 1; i < arr.length; i++) {
+            if (arr[i][key] < pivot[key]) {
+                left.push(arr[i]);
+            } else {
+                right.push(arr[i]);
+            }
+        }
+        
+        return [...quickSort(left, key), pivot, ...quickSort(right, key)];
+    }
+
+    // Function to sort the library based on the selected key (duration, artist, genre)
+    function sortLibrary(key) {
+        musicLibrary = quickSort(musicLibrary, key);
+        renderLibrary();
+    }
+
+    // Initial render of the library
+    renderLibrary();
+</script>
+
+</body>
+</html>

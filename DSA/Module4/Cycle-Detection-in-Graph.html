@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cycle Detection in Graph</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        textarea {
+            width: 80%;
+            height: 100px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .output {
+            margin-top: 20px;
+            text-align: left;
+            display: inline-block;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cycle Detection in Graph</h1>
+    <p>Enter the graph as adjacency list (JSON format). Example: {"1": ["2"], "2": ["3"], "3": ["1"]}</p>
+    <textarea id="graphInput" placeholder='{"1": ["2"], "2": ["3"], "3": ["1"]}'></textarea>
+    <br>
+    <button onclick="detectCycles()">Detect Cycles</button>
+
+    <div class="output">
+        <h2>Output:</h2>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        function detectCycles() {
+            const graphInput = document.getElementById('graphInput').value;
+
+            try {
+                const graph = JSON.parse(graphInput);
+
+                const directedCycle = detectCycleInDirectedGraph(graph);
+                const undirectedCycle = detectCycleInUndirectedGraph(graph);
+
+                document.getElementById('output').textContent = `Directed Graph: ${directedCycle ? "Cycle Detected" : "No Cycle"}\nUndirected Graph: ${undirectedCycle ? "Cycle Detected" : "No Cycle"}`;
+            } catch (error) {
+                document.getElementById('output').textContent = `Error: ${error.message}`;
+            }
+        }
+
+        function detectCycleInDirectedGraph(graph) {
+            const visited = new Set();
+            const recStack = new Set();
+
+            function dfs(node) {
+                if (recStack.has(node)) return true;
+                if (visited.has(node)) return false;
+
+                visited.add(node);
+                recStack.add(node);
+
+                for (const neighbor of graph[node] || []) {
+                    if (dfs(neighbor)) return true;
+                }
+
+                recStack.delete(node);
+                return false;
+            }
+
+            for (const node in graph) {
+                if (dfs(node)) return true;
+            }
+
+            return false;
+        }
+
+        function detectCycleInUndirectedGraph(graph) {
+            const visited = new Set();
+
+            function dfs(node, parent) {
+                visited.add(node);
+
+                for (const neighbor of graph[node] || []) {
+                    if (!visited.has(neighbor)) {
+                        if (dfs(neighbor, node)) return true;
+                    } else if (neighbor !== parent) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            for (const node in graph) {
+                if (!visited.has(node)) {
+                    if (dfs(node, null)) return true;
+                }
+            }
+
+            return false;
+        }
+    </script>
+</body>
+</html>

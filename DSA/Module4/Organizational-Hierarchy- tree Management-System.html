@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizational Hierarchy Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 80%;
+            text-align: center;
+        }
+
+        .tree-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .node {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #81c784;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .node:hover {
+            background-color: #66bb6a;
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Organizational Hierarchy Management</h1>
+    <div id="treeContainer" class="tree-container"></div>
+    <div class="buttons">
+        <button onclick="hireEmployee()">Hire New Employee</button>
+        <button onclick="promoteEmployee()">Promote Employee</button>
+        <button onclick="removeEmployee()">Remove Employee</button>
+    </div>
+</div>
+
+<script>
+    // TreeNode Class to represent each employee
+    class TreeNode {
+        constructor(name, position) {
+            this.name = name;
+            this.position = position;
+            this.subordinates = [];
+        }
+
+        addSubordinate(employee) {
+            this.subordinates.push(employee);
+        }
+
+        removeSubordinate(employee) {
+            const index = this.subordinates.indexOf(employee);
+            if (index > -1) {
+                this.subordinates.splice(index, 1);
+            }
+        }
+    }
+
+    // The root of the organizational hierarchy (CEO)
+    let root = new TreeNode("Alice", "CEO");
+
+    // Function to display the tree
+    function displayTree() {
+        const treeContainer = document.getElementById("treeContainer");
+        treeContainer.innerHTML = '';
+        renderTree(root, treeContainer);
+    }
+
+    // Function to render a single node and its subordinates
+    function renderTree(node, parentElement) {
+        const nodeElement = document.createElement("div");
+        nodeElement.classList.add("node");
+        nodeElement.innerHTML = `${node.name} - ${node.position}`;
+        parentElement.appendChild(nodeElement);
+
+        if (node.subordinates.length > 0) {
+            const subordinatesContainer = document.createElement("div");
+            subordinatesContainer.style.marginLeft = "20px";
+            node.subordinates.forEach(subordinate => {
+                renderTree(subordinate, subordinatesContainer);
+            });
+            parentElement.appendChild(subordinatesContainer);
+        }
+    }
+
+    // Function to hire a new employee
+    function hireEmployee() {
+        const name = prompt("Enter the name of the new employee:");
+        const position = prompt("Enter the position of the new employee:");
+        const supervisorName = prompt("Enter the name of the supervisor:");
+
+        const supervisor = findEmployee(root, supervisorName);
+        if (supervisor) {
+            const newEmployee = new TreeNode(name, position);
+            supervisor.addSubordinate(newEmployee);
+            alert(`${name} has been hired under ${supervisorName}`);
+            displayTree();
+        } else {
+            alert(`Supervisor ${supervisorName} not found!`);
+        }
+    }
+
+    // Function to promote an employee
+    function promoteEmployee() {
+        const name = prompt("Enter the name of the employee to promote:");
+        const newPosition = prompt("Enter the new position:");
+
+        const employee = findEmployee(root, name);
+        if (employee) {
+            employee.position = newPosition;
+            alert(`${name} has been promoted to ${newPosition}`);
+            displayTree();
+        } else {
+            alert(`Employee ${name} not found!`);
+        }
+    }
+
+    // Function to remove an employee
+    function removeEmployee() {
+        const name = prompt("Enter the name of the employee to remove:");
+
+        const employee = findEmployee(root, name);
+        if (employee) {
+            const supervisor = findSupervisor(root, name);
+            if (supervisor) {
+                supervisor.removeSubordinate(employee);
+                alert(`${name} has been removed from the hierarchy.`);
+                displayTree();
+            } else {
+                alert(`Employee ${name} does not have a supervisor.`);
+            }
+        } else {
+            alert(`Employee ${name} not found!`);
+        }
+    }
+
+    // Function to find an employee by name (recursive)
+    function findEmployee(node, name) {
+        if (node.name === name) {
+            return node;
+        }
+        for (let i = 0; i < node.subordinates.length; i++) {
+            const found = findEmployee(node.subordinates[i], name);
+            if (found) return found;
+        }
+        return null;
+    }
+
+    // Function to find the supervisor of an employee (recursive)
+    function findSupervisor(node, name) {
+        for (let i = 0; i < node.subordinates.length; i++) {
+            if (node.subordinates[i].name === name) {
+                return node;
+            }
+            const found = findSupervisor(node.subordinates[i], name);
+            if (found) return found;
+        }
+        return null;
+    }
+
+    // Initial Display of the Organizational Hierarchy
+    displayTree();
+
+</script>
+
+</body>
+</html>

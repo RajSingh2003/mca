@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Coloring Problem (Greedy Algorithm)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 70%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .graph-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .node {
+            width: 60px;
+            height: 60px;
+            background-color: #b3e5fc;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .node:hover {
+            background-color: #81d4fa;
+        }
+
+        #result {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Graph Coloring (Greedy Algorithm)</h1>
+    <div class="graph-container" id="graphContainer"></div>
+    <div id="result">Colors Used: </div>
+    <button onclick="colorGraph()">Color Graph</button>
+</div>
+
+<script>
+    // Graph data (adjacency list)
+    const graph = {
+        0: [1, 2],
+        1: [0, 2, 3],
+        2: [0, 1, 3],
+        3: [1, 2, 4],
+        4: [3]
+    };
+
+    // Array to store color assigned to each node
+    let colors = new Array(Object.keys(graph).length).fill(-1); // -1 indicates no color
+
+    // Create nodes and append to graph container
+    function createGraph() {
+        const container = document.getElementById('graphContainer');
+        Object.keys(graph).forEach((node, index) => {
+            const nodeElement = document.createElement('div');
+            nodeElement.classList.add('node');
+            nodeElement.setAttribute('data-node', index);
+            nodeElement.innerText = index;
+            nodeElement.addEventListener('click', () => colorNode(index));
+            container.appendChild(nodeElement);
+        });
+    }
+
+    // Color the nodes using greedy algorithm
+    function colorGraph() {
+        // Iterate through each node to assign colors
+        for (let node = 0; node < Object.keys(graph).length; node++) {
+            let availableColors = new Array(Object.keys(graph).length).fill(true);
+
+            // Mark the colors of the adjacent nodes as unavailable
+            graph[node].forEach(adjacent => {
+                if (colors[adjacent] !== -1) {
+                    availableColors[colors[adjacent]] = false;
+                }
+            });
+
+            // Assign the first available color to the current node
+            for (let color = 0; color < availableColors.length; color++) {
+                if (availableColors[color]) {
+                    colors[node] = color;
+                    break;
+                }
+            }
+        }
+        
+        // Display the result
+        displayResult();
+        updateNodeColors();
+    }
+
+    // Display the number of colors used
+    function displayResult() {
+        const uniqueColors = [...new Set(colors)].filter(c => c !== -1);
+        document.getElementById('result').innerText = `Colors Used: ${uniqueColors.length}`;
+    }
+
+    // Update the node colors on the graph
+    function updateNodeColors() {
+        const nodes = document.querySelectorAll('.node');
+        nodes.forEach(nodeElement => {
+            const nodeIndex = nodeElement.getAttribute('data-node');
+            const color = colors[nodeIndex];
+            nodeElement.style.backgroundColor = getColorForNode(color);
+        });
+    }
+
+    // Function to get color based on the index
+    function getColorForNode(colorIndex) {
+        const colors = ['#FFCDD2', '#C5E1A5', '#81D4FA', '#FFEB3B', '#FF8A65', '#D1C4E9'];
+        return colors[colorIndex % colors.length]; // Loop through colors if more than 6 nodes
+    }
+
+    // Initialize the graph
+    createGraph();
+</script>
+
+</body>
+</html>

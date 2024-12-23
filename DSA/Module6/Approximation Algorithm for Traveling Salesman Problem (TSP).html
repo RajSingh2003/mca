@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traveling Salesman Problem - Approximation Algorithm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+            background-color: #f4f4f9;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        textarea {
+            width: 90%;
+            height: 100px;
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        pre {
+            background: #eee;
+            padding: 10px;
+            overflow-x: auto;
+            text-align: left;
+        }
+
+        .output {
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Traveling Salesman Problem - Approximation Algorithm</h1>
+    <p>Enter the distances between cities in a matrix format.</p>
+
+    <div>
+        <textarea id="distanceMatrix" placeholder="Enter distance matrix (comma-separated rows, e.g., 0,10,15;10,0,20;15,20,0)"></textarea>
+        <button onclick="solveTSP()">Solve TSP</button>
+    </div>
+
+    <div class="output">
+        <h2>Output:</h2>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        function parseMatrix(input) {
+            return input.split(';').map(row => row.split(',').map(Number));
+        }
+
+        function nearestNeighborTSP(distanceMatrix) {
+            const n = distanceMatrix.length;
+            const visited = Array(n).fill(false);
+            let path = [0]; // Start at city 0
+            visited[0] = true;
+            let totalDistance = 0;
+
+            for (let step = 0; step < n - 1; step++) {
+                const lastCity = path[path.length - 1];
+                let nearestCity = -1;
+                let nearestDistance = Infinity;
+
+                for (let city = 0; city < n; city++) {
+                    if (!visited[city] && distanceMatrix[lastCity][city] < nearestDistance) {
+                        nearestCity = city;
+                        nearestDistance = distanceMatrix[lastCity][city];
+                    }
+                }
+
+                path.push(nearestCity);
+                visited[nearestCity] = true;
+                totalDistance += nearestDistance;
+            }
+
+            // Return to the start city
+            totalDistance += distanceMatrix[path[path.length - 1]][path[0]];
+            path.push(0);
+
+            return { path, totalDistance };
+        }
+
+        function solveTSP() {
+            const matrixInput = document.getElementById('distanceMatrix').value.trim();
+            const distanceMatrix = parseMatrix(matrixInput);
+
+            if (!distanceMatrix.every(row => row.length === distanceMatrix.length)) {
+                document.getElementById('output').textContent = 'Distance matrix must be square (e.g., 3x3, 4x4).';
+                return;
+            }
+
+            const result = nearestNeighborTSP(distanceMatrix);
+
+            document.getElementById('output').textContent = `Approximate Path: ${result.path.join(' -> ')}\n` +
+                `Total Distance: ${result.totalDistance}\n` +
+                `\nNote: This is a greedy nearest-neighbor algorithm, which may not provide the optimal solution but runs in O(n^2) time.`;
+        }
+    </script>
+</body>
+</html>
